@@ -5,22 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>weather</title>
     <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.0/css/swiper.min.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.0/js/swiper.min.js"></script>
+    <script type="text/javascript" src="js/line.js"></script>
     <script type="text/javascript" src="js/city.js"></script>
+    
 
   </head>
   <body>
     <div class="weather" id="app">
-        <div class="loadingBox"><img src="imgs/loading.gif" height="20" width="20"></div>
         <div class="citySwtichBox hide">
             <div class="title">切换城市</div>
             <div class="close">×</div>
             <div class="hisCities">
-                <div class="hisCity" v-for="c in hisCities" @click="swtichHisCity(c.i, c.c)">{{c.c}} <i class="del" @click.stop="delHisCity(c.i)">×</i></div>
+                <div class="hisCity" v-for="c in cities" @click="swtichHisCity(c.i, c.c)">{{c.c}} <i class="del" @click.stop="delCity(c.i)">×</i></div>
             </div>
             <div class="cityInputBox">
                 <input type="text" class="itext" placeholder="请输入城市名称" name="cityName"/>
@@ -28,357 +32,99 @@
             </div>
             <a class="btnSave" href="javascript:;" @click="swtichCity">保存</a>
         </div>
-
-        <div class="hide" ref="forcast">
-            <div class="topbar">
-                <div class="city">
-                    <span class="cityName">{{cityName}}</span>
-                    <a id="citySwtichBtn" href="javascript:;" @click="showCitySwtich"></a>
-                </div>
-                <div class="updateTime" v-if="updateTime">{{updateTime}} 更新</div>
+        <div class="swiper-container forcast-box" ref="forcastBox">
+            <div class="swiper-pagination swiper-nav"></div>
+            <div class="swiper-wrapper">
+                <forcast v-for="c in cities" :key="c.i" :city-id="c.i" class="swiper-slide"></forcast>
             </div>
-            <div id="alarms"></div>
-            <div class="idxs" v-if="sk">
-                <div class="idx temp">
-                    <span class="tempVal">{{sk.temp}}</span>
+        </div>
+        <div class="btns">
+            <a href="javascript:void(0);" class="btn-add" @click="showCitySwtich"> + </a>
+        </div>
+    </div>
+
+    <script type="text/x-template" id="forcast-template">
+        
+        <div class="forcast">
+            <div class="loadingBox" v-show="loading"><img src="imgs/loading.gif" height="20" width="20"></div>
+          <div class="topbar">
+                <div class="city">
+                    <span class="cityName">{{fdata.cityName}}</span>
+                </div>
+                <div class="updateTime" v-if="fdata.updateTime">{{fdata.updateTime}} 更新</div>
+            </div>
+            <div class="alarms swiper-container" ref="alarms">
+                <div class="swiper-wrapper">
+                    <a v-for="alarm in fdata.alarms" :class="alarm.clazz" class="swiper-slide" href="javascript:void(0);">{{alarm.text}}</a>
+                </div>
+            </div>
+            <div class="idxs" v-if="fdata.sk">
+                <div class="idx temp left">
+                    <span class="tempVal">{{fdata.sk.temp}}</span>
                     <span class="tempUnit">℃</span>
                 </div>
                 <div class="right">
-                    <div class="idx aqi" :style="{backgroundColor: sk.aqisbg}">
-                        <span class="aqiVal">{{sk.aqi}}</span>
-                        <span class="aqis">{{sk.aqis}}</span>
+                    <div class="idx aqi" :style="{backgroundColor: fdata.sk.aqisbg}">
+                        <span class="aqiVal">{{fdata.sk.aqi}}</span>
+                        <span class="aqis">{{fdata.sk.aqis}}</span>
                     </div>
                     <div class="idx wind">
-                        <span class="windD">{{sk.windD}}</span>
-                        <span class="windS">{{sk.windS}}</span>
+                        <span class="windD">{{fdata.sk.windD}}</span>
+                        <span class="windS">{{fdata.sk.windS}}</span>
                     </div>
                     <div class="idx sd">
                         <span>相对湿度</span>
-                        <span class="sdVal">{{sk.sd}}</span>
+                        <span class="sdVal">{{fdata.sk.sd}}</span>
                     </div>
                 </div>
             </div>
 
             <div class="trend">
                 <div class="dr weekday">
-                    <div class="dc" v-for="i in fc">{{i.fj}}</div>
+                    <div class="dc" v-for="i in fdata.fc">{{i.fj}}</div>
                 </div>
                 <div class="dr weatherIcon">
-                    <div class="dc" v-for="i in fc"><i class="wicon" :class="i.d"></i></div>
+                    <div class="dc" v-for="i in fdata.fc"><i class="wicon" :class="i.d"></i></div>
                 </div>
                 <div class="dr lineDiv">
-                    <div id="topTemp"></div>
-                    <div id="lowTemp"></div>
+                    <div ref="topTemp"></div>
+                    <div ref="lowTemp"></div>
                 </div>
                 <div class="dr weatherIcon">
-                    <div class="dc" v-for="i in fc"><i class="wicon" :class="i.n"></i></div>
+                    <div class="dc" v-for="i in fdata.fc"><i class="wicon" :class="i.n"></i></div>
                 </div>
                 <div class="dr wind">
-                    <div class="dc" v-for="i in fc">{{i.w}}</div>
+                    <div class="dc" v-for="i in fdata.fc">{{i.w}}</div>
                 </div>
                 <div class="dr windLevel">
-                    <div class="dc" v-for="i in fc">{{i.wl}}</div>
+                    <div class="dc" v-for="i in fdata.fc">{{i.wl}}</div>
                 </div>
             </div>
 
-            <ul class="zsList" v-if="zs">
+            <ul class="zsList" v-if="fdata.zs">
                 <li class="zs zwx">
                     <div class="zsIcon"></div>
                     <div class="zsTitle">紫外线指数</div>
-                    <div class="zsText">{{zs.zwx}}</div>
+                    <div class="zsText">{{fdata.zs.zwx}}</div>
                 </li>
                 <li class="zs cy">
                     <div class="zsIcon"></div>
                     <div class="zsTitle">穿衣指数</div>
-                    <div class="zsText">{{zs.cy}}</div>
+                    <div class="zsText">{{fdata.zs.cy}}</div>
                 </li>
                 <li class="zs xc">
                     <div class="zsIcon"></div>
                     <div class="zsTitle">洗车指数</div>
-                    <div class="zsText">{{zs.xc}}</div>
+                    <div class="zsText">{{fdata.zs.xc}}</div>
                 </li>
                 <li class="zs gm">
                     <div class="zsIcon"></div>
                     <div class="zsTitle">感冒指数</div>
-                    <div class="zsText">{{zs.gm}}</div>
+                    <div class="zsText">{{fdata.zs.gm}}</div>
                 </li>
             </ul>
         </div>
-    </div>
-
-    <script type="text/javascript">
-      var s, _ = Function,dataSK,dataZS,fc,alarmDZ;
-
-      $(document).ready(function(){
-
-         var regNum = new RegExp("^[0-9]*[0-9][0-9]*$"),
-            regEn = new RegExp("^[A-Za-z]+$"),
-            regCn = new RegExp("[一-龥]");
-
-        $(".citySwtichBox .close").click(function() {
-            $(".citySwtichBox").hide()
-        });
-        $(".cityInputBox .cityList").on('click', 'li', function(){
-            $(".cityInputBox input[name=cityName]").val($(this).text().split('-')[0]).attr('num', $(this).attr('num'));
-            $(".cityInputBox .cityList").hide();
-        });
-        $(".cityInputBox input[name=cityName]").focus(function() {
-            $(this).val("").attr('num', '');
-        }).keyup(function(){
-            var a = $(this).val(), hs = '', n = 0;
-            if(a.length > 0){
-                var ar = new RegExp(a, 'ig');
-                if(regNum.test(a)){
-                    $.each(CITIES, function(i, c){
-                        return ar.test(c[0]) ? (hs += ['<li num="', c[0], '">', c[1], '-', c[3], '-', c[0].replace(ar, '<b>$&</b>'), '</li>'].join(''), ++n < 10) : !0;
-                    })
-                }else if(regEn.test(a)){
-                    $.each(CITIES, function(i, c){
-                        return ar.test(c[2])? (hs += ['<li num="', c[0], '">', c[1], '-', c[3], '-', c[2].replace(ar, '<b>$&</b>'), '</li>'].join(''), ++n < 10) : !0;
-                    })
-                }else if(regCn.test(a)){
-                    $.each(CITIES, function(i, c){
-                        return ar.test(c[1]) || ar.test(c[3]) ? (hs += ['<li num="', c[0], '">', (c[1] + '-' + c[3]).replace(ar, '<b>$&</b>'), '</li>'].join(''), ++n < 10) : !0;
-                    })
-                }
-            }
-            $(".cityInputBox .cityList").html(hs).toggle(!!hs);;
-
-        });
-  
-      });
-
-    function getCities(){
-        if(window.localStorage){
-            return JSON.parse(localStorage.getItem('cities'))||[];
-        }
-        return [];
-      }
-      function recCity(cityId, cityName){
-        var cities = getCities();
-        if(window.localStorage){
-            var has = false;
-            $.each(cities, function(i, c){
-                if(cityId == c.i){
-                    cities.unshift(cities.splice(i, 1)[0]);
-                    has = true;
-                    return false;
-                }
-            });
-            if(!has){
-                cities.unshift({i: cityId, c: cityName});
-                if(cities.length > 5){
-                    cities.length = 5;
-                }
-            }
-            localStorage.setItem('cities', JSON.stringify(cities))
-        }
-      }
-      function delCity(cityId){
-        var cities = getCities();
-        $.each(cities, function(i, c){
-            if(cityId == c.i){
-                cities.splice(i, 1);
-            }
-        });
-        localStorage.setItem('cities', JSON.stringify(cities))
-      }
-
-      function drawLine(opt){
-            var a = opt.data || [];
-            var ele = document.getElementById(opt.domId);
-            ele.innerHTML = '';
-            opt.width = ele.offsetWidth;
-            var max = Math.max(...a), min = Math.min(...a);
-            var h = max == min ? (opt.height - 40) / 1 : (opt.height - 40) / (max -min);
-            var w = opt.width / a.length;
-            var circles = [], paths = [];
-            var c = [], p = [];
-            for(var i = 0; i < a.length; i++){
-                c.push({x: w * i + w / 2, y: (max - a[i]) * h + 20});
-                p.push([c[i].x, c[i].y]);
-            }
-
-            var paper = Raphael(opt.domId, opt.width, opt.height);
-            paper.clear();
-
-            paper.path("M10,20").attr({
-                stroke: opt.color,
-                "stroke-width": 1,
-                path: "M" + p.join(",")
-            });
-            var pos = opt.above ? -14 : 14;
-            for(var i = 0; i < c.length; i++){
-                paper.circle(10, c[i].y, 2).attr({
-                    fill: opt.color,
-                    stroke: opt.color,
-                    cx: c[i].x
-                });
-                paper.text(c[i].x - 15, c[i].y + pos, a[i] + "℃" || "").attr({
-                    fill: "#333",
-                    "font-size": "12px",
-                    "text-anchor": "start"
-                });
-            }
-        }
-
-
-    var app = new Vue({
-        el: '#app',
-        data: {
-            cityName: '',
-            updateTime: null,
-            sk: null,
-            zs: null,
-            fc: null,
-            hisCities: [],
-            ready: false
-        },
-        mounted: function(){
-            this.getWeather('101010100');
-            $(this.$refs.forcast).removeClass('hide');
-        },
-        methods: {
-            getWeather: function(cityId){
-                var url = "http://d1.weather.com.cn/weather_index/" + cityId + ".html"; 
-                var self = this;
-                $('.loadingBox').show();
-                $.getScript('/proxy?url='+encodeURIComponent(url), function() {
-                    var sk = null, zs = null, fc0 = null;
-
-                    if(dataSK){
-                        sk = {};
-                        var AQIS = [['优' ,'#9CCA7F'], ['良','#F9DA65'], ['轻度污染','#F29F39'], ['中度污染','#DB555E'], ['重度污染','#BA3779'], ['严重污染','#881326']];
-                        var aqi = sk.aqi = dataSK.aqi;
-                        var AQI = AQIS[(aqi > 0 && aqi < 50) ? 0 : (aqi >= 50 && aqi < 100) ? 1 : (aqi >= 100 && aqi < 150) ? 2 : (aqi >= 150 && aqi <= 200) ? 3 : (aqi > 200 && aqi <= 300) ? 4 : 5];
-                        sk.aqis = AQI[0];
-                        sk.aqisbg = AQI[1];
-                        sk.temp = dataSK.temp;
-                        sk.sd = dataSK.sd;
-                        sk.windD = dataSK.WD;
-                        sk.windS = dataSK.WS;
-                        self.updateTime = dataSK.time;
-                        self.cityName = dataSK.cityname;
-                        dataSK = null;
-                    }else{
-                        self.updateTime = null;
-                    }
-
-                    if(dataZS){
-                        zs = {};
-                        zs.zwx = dataZS.zs.uv_hint;
-                        var ct = dataZS.zs.ct_hint;
-                        zs.cy = ("炎热" == ct || "热" == ct) ? "短袖" : ("舒适" == ct) ? "衬衫" : ("较舒适" == ct) ? "薄外套" : ("较冷" == ct) ? "厚毛衣" : "羽绒服";
-                        zs.xc = dataZS.zs.xc_hint;
-                        zs.gm = dataZS.zs.gm_hint;
-                        dataZS = null;
-                    }
-
-                    
-                    var data1,data2;
-                    if(fc){
-                        fc0 = [];
-                        data1 = [], data2 = [], date = new Date().getHours();
-                        var dn = date > 0 && date < 18, len = fc.f.length > 5 ? 5 : fc.f.length;
-                        for(var i = 0; i < len; i++){
-                            var f = fc.f[i];
-                            fc0[i]= {fj: f.fj, d: 'd' + f.fa, n: 'n' + f.fb, w: dn ? f.fe : f.ff, wl : dn ? f.fg : f.fh};
-                            data1[i] = f.fc;
-                            data2[i] = f.fd;
-                        }
-                        fc = null;
-                    }
-
-                    self.sk = sk,  self.zs = zs, self.fc = fc0;
-
-                    if(alarmDZ && alarmDZ.w && alarmDZ.w.length > 0){
-
-                        var w = alarmDZ.w;
-                        var lnk = 'http://www.weather.com.cn/alarm/newalarmcontent.shtml?file=';
-                        var hs = '';
-                        for(var i = 0; i < w.length; i++){
-                            var color = w[i].w7, clazz = color == '蓝色' ? 'alarmB' : color == '黄色' ? 'alarmY' : color == '红色' ? 'alarmR' : color == '白色' ? 'alarmW' : 'alarmO',
-                            text = (w[i].w3 ? w[i].w3 : w[i].w2 ? w[i].w2 : w[i].w1) + '发布' + w[i].w5 + w[i].w7 + '预警';
-                            hs += '<a class="' + clazz + '" target="_blank" href="' + lnk + w[i].w11 + '">' + text + '</a>';
-                        }
-                        
-                        with (o = document.getElementById("alarms")){
-                            if(w.length > 1){
-                                innerHTML = hs + hs;
-                                onmouseover = _("s=1"),
-                                onmouseout = _("s=0");
-                                (F = _("if(#%28||!s)#++,#%=o.scrollHeight>>1;setTimeout(F,#%28?10:4000);".replace(/#/g, "o.scrollTop")))()
-                            }else{
-                                innerHTML = hs;
-                            }
-                        }
-                        $("#alarms").show();
-                        alarmDZ = null;
-                    }else{
-                        $("#alarms").empty().hide();
-                    }
-
-                    if(data1){
-                        self.$nextTick(function(){
-                            drawLine({
-                                domId: 'topTemp',
-                                width: 270,
-                                height: 60,
-                                data: data1,
-                                color: '#f68d3b',
-                                above: true        
-                            });
-                            drawLine({
-                                domId: 'lowTemp',
-                                width: 270,
-                                height: 60,
-                                data: data2,
-                                color: '#8ec2f2',
-                                above: false        
-                            });
-                        });
-                    }
-                    $('.loadingBox').hide();
-
-                });
-            },
-            swtichCity: function(){
-                var input = $(".cityInputBox input[name=cityName]");
-                var cityId = input.attr('num') || '';
-                var cityName = input.val();
-                if(cityId){
-                    this.cityName = cityName;
-                    this.getWeather(cityId);
-                    $(".citySwtichBox").hide();
-                    recCity(cityId, cityName);
-                    input.attr('num', '').val('');
-                }
-            },
-            swtichHisCity: function(cityId, cityName){
-                this.cityName = cityName;
-                this.getWeather(cityId);
-                recCity(cityId, cityName);
-                $(".citySwtichBox").hide();
-            },
-            showCitySwtich: function(){
-                var cities = getCities();
-                this.hisCities = cities;
-
-                $(".citySwtichBox").show();
-            },
-            delHisCity: function(cityId){
-                for(var i = 0; i < this.hisCities.length; i++){
-                    if(this.hisCities[i].i == cityId){
-                        this.hisCities.splice(i, 1);
-                        break;
-                    }
-                }
-                delCity(cityId);
-            }
-        }
-
-    });
-
     </script>
+    <script type="text/javascript" src="js/main.js"></script>
   </body>
 </html>

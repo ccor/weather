@@ -1,14 +1,20 @@
+html{font-size: 16px;}
+body {margin:0;}
 input {outline: 0;}
-.weather {max-width: 400px; font: 12px "Microsoft Yahei","Tahoma","SimSun"; margin: 0 auto;}
+.weather {width: 100%; font: 14px "Microsoft Yahei","Tahoma","SimSun"; margin: 0 auto;}
+.swiper-nav {top: 32px; left: 8px !important; text-align: left;}
+.nav ul{list-style: none; display: flex; margin: 0; padding: 0;}
+.nav li{padding: 3px; display: inline-block;}
+.nav li > a {text-decoration: none; line-height: 30px; color: #666;}
 .hide {display: none;}
-.topbar{display: flex; align-items: baseline;}
+.topbar{display: flex; align-items: baseline; padding: 0 10px;}
 .loadingBox {position: relative; top:1px; text-align: center; float: left; left: 122px;}
 .topbar .city {line-height: 40px; font-size: 16px; flex: 1; display: flex; align-items: baseline;}
 .topbar .city:before{content: ""; height: 15px; width: 10px; background: url('../imgs/icons.png') no-repeat 0 0; position: relative; float: left; margin-right: 5px; top: 2px}
-.cityName {display: inline-block; line-height: 35px;}
+.cityName {display: inline-block;}
 #citySwtichBtn {display: inline-block; width: 28px; height: 14px; background: url('../imgs/icons.png') no-repeat -32px 0; margin-left: 5px; position:relative; top:3px; }
 #citySwtichBtn:hover {background-position:-60px 0; }
-.citySwtichBox{ position: absolute; width: 270px; background-color: #fff; z-index: 9; border-radius: 3px; top: 42px; box-shadow: 1px 1px 4px 0px #999; }
+.citySwtichBox{ position: absolute; width: 270px; background-color: #fff; z-index: 9; border-radius: 3px; top: 42px; box-shadow: 1px 1px 4px 0px #999; left: 50%; margin-left: -135px;}
 .citySwtichBox .close {float: right; width: 25px; height: 25px; font-size: 18px; color: #b3bac0; cursor: pointer; font-family: serif; position: relative; right: 5px; top: 5px; text-align: center;}
 .citySwtichBox .title{float: left; font-size: 16px; color: #252525; padding: 10px 0 0 10px;}
 .citySwtichBox .hisCities {clear: both; height: 26px; padding: 5px 17px;}
@@ -28,26 +34,27 @@ input {outline: 0;}
 
 .btnSave:hover{background-color: #195ea5}
 .updateTime {color: #666;}
-#alarms {overflow: hidden; height: 28px; width: 100%; margin-top: 2px; opacity: 1; }
-#alarms:hover {opacity: .8 }
-#alarms a {font-size: 14px; text-decoration:none; display: block; background: #000; color: #fff; text-align: center; height: 28px; line-height: 28px }
-#alarms .alarmR {background: #d9424c; color: #fff }
-#alarms .alarmO {background: #f68d3b; color: #fff }
-#alarms .alarmW {background: #fff; color: #000 }
-#alarms .alarmY {background: #ffce00; color: #252525 }
-#alarms .alarmB {background: #7ebeff; color: #252525 }
+.alarms {overflow: hidden; height: 28px; width: 100%; margin-top: 10px; opacity: 1; }
+.alarms:hover {opacity: .8 }
+.alarms a {font-size: 14px; text-decoration:none; display: block; background: #000; color: #fff; text-align: center; height: 28px; line-height: 28px }
+.alarms .alarmR {background: #d9424c; color: #fff }
+.alarms .alarmO {background: #f68d3b; color: #fff }
+.alarms .alarmW {background: #fff; color: #000 }
+.alarms .alarmY {background: #ffce00; color: #252525 }
+.alarms .alarmB {background: #7ebeff; color: #252525 }
 
 .idxs {margin: 0; padding: 0; list-style: none; height: 110px; border-bottom: 1px solid #ccc; display: flex;}
+.idxs .left{flex:1;}
+.idxs .right{padding-right: 20px;}
 .idxs .idx {display: block;}
 .idxs .idx span {display: inline-block;}
-.idxs .temp {width: 160px; float: left; color: #043567; text-align: center; flex: 1;}
+.idxs .temp {width: 160px; float: left; color: #043567; text-align: center;}
 .idxs .temp .tempVal {font-size: 80px; height: 110px; }
 .idxs .temp .tempUnit {font-size: 22px; position: relative; top: -44px; left: -5px; }
-.idxs .right {padding-right: 15px;}
-.idxs .aqi {width: 90px; height: 16px; line-height: 16px; border-radius: 8px; text-align: center; color: #fff; opacity: 1; margin-top: 22px; }
+.idxs .aqi {width: 95px; line-height: 16px; border-radius: 10px; text-align: center; color: #fff; opacity: 1; margin-top: 22px; padding:3px 5px;}
 .idxs .wind {width: 109px; margin: 8px 0;}
-.idxs .wind:before { content: ""; height: 15px; width: 14px; position: relative; margin-right: 5px; top: 3px; background: url('../imgs/icons.png') no-repeat -18px 0; }
-.idxs .sd {width: 109px; float: left; line-height: 17px;}
+.idxs .wind:before { display: inline-block; content: ""; height: 15px; width: 14px; position: relative; margin-right: 5px; top: 3px; background: url('../imgs/icons.png') no-repeat -18px 0; }
+.idxs .sd {line-height: 17px;}
 .idxs .sd:before {content: ""; height: 15px; width: 8px; position: relative; float: left; margin:0 10px 0 2px; background: url('../imgs/icons.png') no-repeat -10px 0;}
 
 .trend {clear: both; padding-top: 10px; display: flex; flex-direction: column;}
@@ -55,10 +62,9 @@ input {outline: 0;}
 .trend .dc{width: 20%; float: left; text-align: center;}
 .trend .weekday {}
 .trend .wind {color: #666; }
-.trend .windLevel {margin-top: 0; color: #666; }
-#lowTemp {margin-top: -20px;}
+.trend .windLevel {color: #666; }
 .wicon { margin: 0 auto; display: block; background-image: url(../imgs/blue30.png); height: 30px; width: 30px;}
-.zsList {margin: 10px 0 0 0; padding:0;display: flex; justify-content: space-between; background: #5371bf;}
+.zsList {margin: 10px 0 0 0; padding:0;display: flex; justify-content: space-around; background: #5371bf;}
 .zsList .zs {float: left; width: 65px; height: 87px;  text-align: center; display: inline;}
 .zs .zsIcon{ display: block; height: 30px; width: 30px; background: url(../imgs/icons.png) no-repeat; margin: 6px auto;}
 .zs .zsTitle{font-size: 10px; color: #c3dcf4;}
@@ -67,6 +73,9 @@ input {outline: 0;}
 .zs.cy .zsIcon {background-position: -60px -15px;}
 .zs.xc .zsIcon {background-position: -30px -15px;}
 .zs.gm .zsIcon {background-position: -90px -15px;}
+
+.btns {position: fixed; bottom: 10px; right: 10px; z-index: 9;}
+.btns .btn-add{ display: block; line-height: 45px; text-align: center; text-decoration: none; color: #666; font-size: 20px; width: 45px; height: 45px; border-radius: 100%; background: #eee; box-shadow: 0 0 5px 0 #999;}
 
 .d0 {background-position: 0 0 }
 .d1 {background-position: -80px 0 }
