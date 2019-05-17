@@ -1,0 +1,10 @@
+# System
+.DS_Store
+
+# Package
+package-lock.json
+pnpm-lock.yaml
+
+# Dependency directories
+node_modules
+node_modules/
