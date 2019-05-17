@@ -2,14 +2,14 @@ html{font-size: 16px;}
 body {margin:0;}
 input {outline: 0;}
 .weather {width: 100%; font: 14px "Microsoft Yahei","Tahoma","SimSun"; margin: 0 auto;}
-.swiper-nav {top: 32px; left: 8px !important; text-align: left;}
+.swiper-nav {top: 32px; left: 12px !important; bottom: unset !important; text-align: left;}
 .nav ul{list-style: none; display: flex; margin: 0; padding: 0;}
 .nav li{padding: 3px; display: inline-block;}
 .nav li > a {text-decoration: none; line-height: 30px; color: #666;}
 .hide {display: none;}
-.topbar{display: flex; align-items: baseline; padding: 0 10px;}
+.topbar{display: flex; align-items: baseline;}
 .loadingBox {position: relative; top:1px; text-align: center; float: left; left: 122px;}
-.topbar .city {line-height: 40px; font-size: 16px; flex: 1; display: flex; align-items: baseline;}
+.topbar .city {line-height: 40px; font-size: 16px; flex: 1; display: flex; align-items: baseline; margin-left: 15px;}
 .topbar .city:before{content: ""; height: 15px; width: 10px; background: url('../imgs/icons.png') no-repeat 0 0; position: relative; float: left; margin-right: 5px; top: 2px}
 .cityName {display: inline-block;}
 #citySwtichBtn {display: inline-block; width: 28px; height: 14px; background: url('../imgs/icons.png') no-repeat -32px 0; margin-left: 5px; position:relative; top:3px; }
@@ -33,15 +33,15 @@ input {outline: 0;}
 .citySwtichBox .btnSave{display: block; background-color: #3375b9; font-size: 14px; height: 30px; line-height: 30px; width: 238px; color: #fff; margin: 0 auto 20px; text-decoration: none; text-align: center; border-radius: 3px;}
 
 .btnSave:hover{background-color: #195ea5}
-.updateTime {color: #666;}
+.updateTime {color: #666; margin-right: 15px;}
 .alarms {overflow: hidden; height: 28px; width: 100%; margin-top: 10px; opacity: 1; }
 .alarms:hover {opacity: .8 }
 .alarms a {font-size: 14px; text-decoration:none; display: block; background: #000; color: #fff; text-align: center; height: 28px; line-height: 28px }
-.alarms .alarmR {background: #d9424c; color: #fff }
-.alarms .alarmO {background: #f68d3b; color: #fff }
-.alarms .alarmW {background: #fff; color: #000 }
-.alarms .alarmY {background: #ffce00; color: #252525 }
-.alarms .alarmB {background: #7ebeff; color: #252525 }
+.alarms .alarmR,.alarms .alarm04 {background: #d9424c; color: #fff }
+.alarms .alarmO,.alarms .alarm03 {background: #f68d3b; color: #fff }
+.alarms .alarmW,.alarms .alarm05 {background: #fff; color: #000 }
+.alarms .alarmY,.alarms .alarm02 {background: #ffce00; color: #252525 }
+.alarms .alarmB,.alarms .alarm01 {background: #7ebeff; color: #252525 }
 
 .idxs {margin: 0; padding: 0; list-style: none; height: 110px; border-bottom: 1px solid #ccc; display: flex;}
 .idxs .left{flex:1;}
@@ -56,6 +56,31 @@ input {outline: 0;}
 .idxs .wind:before { display: inline-block; content: ""; height: 15px; width: 14px; position: relative; margin-right: 5px; top: 3px; background: url('../imgs/icons.png') no-repeat -18px 0; }
 .idxs .sd {line-height: 17px;}
 .idxs .sd:before {content: ""; height: 15px; width: 8px; position: relative; float: left; margin:0 10px 0 2px; background: url('../imgs/icons.png') no-repeat -10px 0;}
+
+.trend-24h-container{position: relative; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ccc;}
+.trend-24h-all{display: flex; list-style: none; padding: 0; margin: 0;}
+.trend-24h-all .col{display: flex; flex-direction: column; width: 45px; text-align: center;}
+.trend-24h-all .holder {height: 136px;}
+.trend-24h-all .time {line-height: 30px; color: #999;}
+.trend-24h-all .icon {}
+.trend-24h-all .wd {margin-top: 6px;}
+.trend-24h-all .wl {margin-top: 6px;}
+.trend-24h-container .dline {position: absolute; height: 100px; top: 10px;}
+.trend-24h-container .icons {position: absolute; height: 30px; top: 80px; display: flex;}
+.trend-24h-container .wls {position: absolute; top: 110px; display: flex; text-align: center; font-size: 12px; line-height: 20px;}
+.trend-24h-container .wls .wl{background: #eee; border-radius:5px 5px 0 0; border-right: 1px solid #fff; color: #666;}
+
+.trend-1d-container{position: relative; display: flex; justify-content: space-around;}
+.trend-1d-container .col{text-align: center;}
+.trend-1d-container .col .weekday{margin-top: 10px;}
+.trend-1d-container .col .icon{margin-top: 10px;}
+.trend-1d-container .holder{height: 130px;}
+.trend-1d-container .dline {position: absolute; height: 60px;}
+.trend-1d-container .topTemp {top: 80px; width: 100%;}
+.trend-1d-container .lowTemp {top: 140px; width: 100%;}
+.trend-1d-container .wd{color: #666; margin-top: 6px;}
+.trend-1d-container .wl{color: #666; margin-top: 6px;}
+
 
 .trend {clear: both; padding-top: 10px; display: flex; flex-direction: column;}
 .trend .dr{width: 100%; clear: both; margin-top: 10px; float: left;}

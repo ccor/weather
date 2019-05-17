@@ -1,0 +1,18 @@
+CACHE MANIFEST
+# 2019-05-05
+index.html
+css/swiper.min.css
+css/main.css
+imgs/blue30.png
+imgs/icons.png
+imgs/loading.gif
+js/lib/raphael.min.js
+js/lib/swiper.min.js
+js/lib/vue.min.js
+js/lib/zepto.min.js
+js/city.js
+js/line.js
+js/main.js
+
+NETWORK:
+*

@@ -1,9 +1,9 @@
+
 $(document).ready(function(){
 
     var regNum = new RegExp("^[0-9]*[0-9][0-9]*$"),
         regEn = new RegExp("^[A-Za-z]+$"),
         regCn = new RegExp("[一-龥]");
-
     
     var debounce = (func, wait) => {
         var timeout, args, context, timestamp, result
@@ -27,7 +27,17 @@ $(document).ready(function(){
           return result
         }
     };
+    var _dh = function(t){
+        var d = t.getDate(),
+            h = t.getHours();
+        return [(d > 9 ? d : '0'+d), (h > 9 ? h : '0'+ h)].join('');
+    }
 
+    var _dhPast = function(){
+        var t = new Date(), h = t.getHours();
+        t.setHours(h-1);
+        return _dh(t);
+    }
 
     Vue.component('forcast', {
         template: '#forcast-template',
@@ -35,26 +45,64 @@ $(document).ready(function(){
         data: function(){
             return {
                 loading: false,
-                fdata: {}
+                fdata: {fd:{}}
             };
+        },
+        computed: {
+            fh: function(){
+                if(this.fdata.fh){
+                    var h = this.fdata.fh.h,
+                        dh = _dhPast(),
+                        i = h.findIndex((v) => {
+                            return v >= dh;
+                        });
+                    var a = h.slice(i, i + 24 < h.length ? i + 24 : h.length - 1);
+
+                    a = a.map(function(it){
+                        var t = parseInt(it[0].substring(2));
+                        it[2] = (t < 6 || t >= 20 ? 'n' : 'd') + it[2];
+                        return it;
+                    });
+                    var t = null, t2 = null;
+                    var b = [], c = [], index = -1, index2 = -1;
+                    for(var i in a){
+                        if(t == a[i][2]){
+                            b[index][1] ++;
+                        }else{
+                            t = a[i][2];
+                            b[++index] = [t, 1];
+                        }
+                        if(t2 == a[i][4]){
+                            c[index2][1] ++;
+                        }else{
+                            t2 = a[i][4];
+                            c[++index2] = [t2, 1];
+                        }
+                    }
+
+                    return {a, b, c};
+
+                }
+                return {};
+            }
         },
         watch: {
             fdata: function(d){
-                if(d.ld1){
+                if(d.fd.ld){
                     this.reDrawLine();
                 }
 
-                if(d.alarms){
+                if(d.w){
                     this.$nextTick(function(){
                         if(this.$refs.alarms.swiper){
-                            if(d.alarms.length > 1){
+                            if(d.w.length > 1){
                                 this.$refs.alarms.swiper.update();
                             }else{
                                 this.$refs.alarms.swiper.destroy();
                             }
 
                         }else{
-                            if(d.alarms.length > 1){
+                            if(d.w.length > 1){
                                 new Swiper(this.$refs.alarms, {
                                     direction: 'vertical',
                                     autoplay: {disableOnInteraction: false},
@@ -62,7 +110,35 @@ $(document).ready(function(){
                                 });
                             }
                         }
+                        
                     });
+                }
+
+                if(d.fh && d.fh.h){
+                    this.$nextTick(function(){
+                        if(this.$refs.trend24h.swiper){
+
+                        }else{
+                            var s = new Swiper(this.$refs.trend24h, {
+                                slidesPerView: 'auto',
+                                freeMode: true,
+                                scrollbar: {
+                                    el: '.swiper-scrollbar',
+                                    hide: true
+                                }
+                            });
+                        }
+
+                        drawLine2({
+                            el: this.$refs.dl24h,
+                            width: 45 * this.fh.a.length,
+                            height: 100,
+                            data: this.fh.a.map((i)=>{return i[1]}),
+                            color: '#8ec2f2',
+                            above: true,
+                            data2: this.fh.b
+                        });
+                    })
                 }
             }
         },
@@ -71,12 +147,20 @@ $(document).ready(function(){
         },
         beforeDestroy: function(){
             if(this.$refs.alarms && this.$refs.alarms.swiper){
-                this.$refs.alarms.swiper.destroy();
+                   this.$refs.alarms.swiper.destroy();
+            }
+        },
+        filters: {
+            wd (v) {
+                return ["无持续风向", "东北风", "东风", "东南风", "南风", "西南风", "西风", "西北风", "北风", "旋转风"][v];
+            },
+            wl (v) {
+                return ["<3级", "3-4级", "4-5级", "5-6级", "6-7级", "7-8级", "8-9级", "9-10级", "10-11级", "11-12级"][v];
             }
         },
         methods: {
             resize: function(){
-                if(this.fdata.ld1){
+                if(this.fdata.fd.ld){
                     this.reDrawLine();
                 }
              },
@@ -85,106 +169,46 @@ $(document).ready(function(){
                     drawLine({
                         el: this.$refs.topTemp,
                         height: 60,
-                        data: this.fdata.ld1,
+                        data: this.fdata.fd.ld[0],
                         color: '#f68d3b',
                         above: true
                     });
                     drawLine({
                         el: this.$refs.lowTemp,
                         height: 60,
-                        data: this.fdata.ld2,
+                        data: this.fdata.fd.ld[1],
                         color: '#8ec2f2',
                         above: false
                     });
                 })
             },
             getForcastData: function(cityId){
-                var url = "http://d1.weather.com.cn/weather_index/" + cityId + ".html";
                 this.loading = true;
 
                 var vm = this;
-                $.get('/proxy?url='+encodeURIComponent(url), function(data) {
-                    var t = data.split(/;? ?var *(\w+) *= */);
-                    if(t.length > 2){
-                        t[0] = '{';
-                        for(var i = 1; i < 10; i++){
-                            if(i % 2  == 1){
-                                t[i] = '"'+t[i]+'":'
-                            }else{
-                                t[i] += ',';
-                            }
-                        }
-                        t[10] += '}';
-                    }
-                    var ret = {};
-                    try{
-                        var ret = JSON.parse(t.join(''));
-                    }catch(e){
-                        console.log(e);
-                    }
+                $.getJSON('/weather/'+cityId, function(ret) {
                     
-                    var fdata = {sk: null, zs: null, fc:null, ld1: null, ld2: null, alarms: null};
-
-                    if(ret.dataSK){
-                        var dataSK = ret.dataSK;
-                        var sk = fdata.sk = {};
+                    if(ret.sk){
+                        var sk = ret.sk;
                         var AQIS = [['优' ,'#9CCA7F'], ['良','#F9DA65'], ['轻度污染','#F29F39'], ['中度污染','#DB555E'], ['重度污染','#BA3779'], ['严重污染','#881326']];
-                        var aqi = sk.aqi = dataSK.aqi;
+                        var aqi = sk.aqi;
                         var AQI = AQIS[(aqi > 0 && aqi < 50) ? 0 : (aqi >= 50 && aqi < 100) ? 1 : (aqi >= 100 && aqi < 150) ? 2 : (aqi >= 150 && aqi <= 200) ? 3 : (aqi > 200 && aqi <= 300) ? 4 : 5];
                         sk.aqis = AQI[0];
                         sk.aqisbg = AQI[1];
-                        sk.temp = dataSK.temp;
-                        sk.sd = dataSK.sd;
-                        sk.windD = dataSK.WD;
-                        sk.windS = dataSK.WS;
-                        fdata.updateTime = dataSK.time;
-                        fdata.cityName = dataSK.cityname;
-                    }else{
-                        fdata.updateTime = null;
                     }
-
-                    if(ret.dataZS){
-                        var dataZS = ret.dataZS;
-                        var zs = fdata.zs = {};
-                        zs.zwx = dataZS.zs.uv_hint;
-                        var ct = dataZS.zs.ct_hint;
-                        zs.cy = ("炎热" == ct || "热" == ct) ? "短袖" : ("舒适" == ct) ? "衬衫" : ("较舒适" == ct) ? "薄外套" : ("较冷" == ct) ? "厚毛衣" : "羽绒服";
-                        zs.xc = dataZS.zs.xc_hint;
-                        zs.gm = dataZS.zs.gm_hint;
-                    }
-
                     
-                    var ld1,ld2;
-                    if(ret.fc){
-                        var fc = ret.fc,
-                            fc0 = fdata.fc = [],
-                            ld1 = fdata.ld1 = [],
-                            ld2 = fdata.ld2 = [],
-                            date = new Date().getHours(),
-                            dn = date > 0 && date < 18, len = fc.f.length > 5 ? 5 : fc.f.length;
-                        for(var i = 0; i < len; i++){
-                            var f = fc.f[i];
-                            fc0[i]= {fj: f.fj, d: 'd' + f.fa, n: 'n' + f.fb, w: dn ? f.fe : f.ff, wl : dn ? f.fg : f.fh};
-                            ld1[i] = f.fc;
-                            ld2[i] = f.fd;
+                    if(ret.fd){
+                        var ld = ret.fd.ld = [[],[]],
+                            h = new Date().getHours();
+                        ret.fd.dn = h > 0 && h < 18;
+                        for(var i = 0, len = ret.fd.d.length; i < len; i++){
+                            var f = ret.fd.d[i];
+                            ld[0].push(f[1]);
+                            ld[1].push(f[2]);
                         }
                     }
 
-                    if(ret.alarmDZ && ret.alarmDZ.w && ret.alarmDZ.w.length > 0){
-                        var alarms = fdata.alarms = [];
-                        var alarmDZ = ret.alarmDZ;
-                        var w = alarmDZ.w;
-                        var lnk = 'http://www.weather.com.cn/alarm/newalarmcontent.shtml?file=';
-                        for(var i = 0; i < w.length; i++){
-                            var color = w[i].w7;
-                            alarms[i] = {
-                                clazz:  color == '蓝色' ? 'alarmB' : color == '黄色' ? 'alarmY' : color == '红色' ? 'alarmR' : color == '白色' ? 'alarmW' : 'alarmO',
-                                text: (w[i].w3 ? w[i].w3 : w[i].w2 ? w[i].w2 : w[i].w1) + '发布' + w[i].w5 + w[i].w7 + '预警'
-                            };
-                        }
-                    }
-
-                    vm.fdata = Object.assign({}, vm.fdata, fdata);
+                    vm.fdata = Object.assign({}, vm.fdata, ret);
                     vm.loading = false; 
 
                 });
@@ -218,6 +242,8 @@ $(document).ready(function(){
                     }
                 }, 300));
             })
+            
+
         },
         methods: {
             updateSwiper: function(){
@@ -275,6 +301,7 @@ $(document).ready(function(){
                 var cityName = input.val();
                 if(cityId){
                     this.cityName = cityName;
+                    
                     $(".citySwtichBox").hide();
                     this.recCity(cityId, cityName);
                     this.getWeather(cityId);
@@ -299,6 +326,7 @@ $(document).ready(function(){
                 $(".citySwtichBox").show();
             }
         }
+
     });
 
 
@@ -332,7 +360,9 @@ $(document).ready(function(){
         $(".cityInputBox .cityList").html(hs).toggle(!!hs);;
     });
 
+
 });
+
 
 
 

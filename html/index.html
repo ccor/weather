@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" manifest="index.appcache">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>weather</title>
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.0/css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.8/vue.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.2.7/raphael.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.0/js/swiper.min.js"></script>
+    <script type="text/javascript" src="js/lib/zepto.min.js"></script>
+    <script type="text/javascript" src="js/lib/vue.min.js"></script>
+    <script type="text/javascript" src="js/lib/raphael.min.js"></script>
+    <script type="text/javascript" src="js/lib/swiper.min.js"></script>
     <script type="text/javascript" src="js/line.js"></script>
     <script type="text/javascript" src="js/city.js"></script>
     
@@ -49,28 +48,28 @@
             <div class="loadingBox" v-show="loading"><img src="imgs/loading.gif" height="20" width="20"></div>
           <div class="topbar">
                 <div class="city">
-                    <span class="cityName">{{fdata.cityName}}</span>
+                    <span class="cityName">{{fdata.cn}}</span>
                 </div>
-                <div class="updateTime" v-if="fdata.updateTime">{{fdata.updateTime}} 更新</div>
+                <div class="updateTime" v-if="fdata.t">{{fdata.t}} 更新</div>
             </div>
             <div class="alarms swiper-container" ref="alarms">
                 <div class="swiper-wrapper">
-                    <a v-for="alarm in fdata.alarms" :class="alarm.clazz" class="swiper-slide" href="javascript:void(0);">{{alarm.text}}</a>
+                    <a v-for="a in fdata.w" :class="'alarm'+a[1]" class="swiper-slide" href="javascript:void(0);">{{a[3]}}</a>
                 </div>
             </div>
             <div class="idxs" v-if="fdata.sk">
                 <div class="idx temp left">
-                    <span class="tempVal">{{fdata.sk.temp}}</span>
+                    <span class="tempVal">{{fdata.sk.t}}</span>
                     <span class="tempUnit">℃</span>
                 </div>
                 <div class="right">
-                    <div class="idx aqi" :style="{backgroundColor: fdata.sk.aqisbg}">
+                    <div class="idx aqi" v-if="fdata.sk.aqi" :style="{backgroundColor: fdata.sk.aqisbg}">
                         <span class="aqiVal">{{fdata.sk.aqi}}</span>
                         <span class="aqis">{{fdata.sk.aqis}}</span>
                     </div>
                     <div class="idx wind">
-                        <span class="windD">{{fdata.sk.windD}}</span>
-                        <span class="windS">{{fdata.sk.windS}}</span>
+                        <span class="windD">{{fdata.sk.wd}}</span>
+                        <span class="windS">{{fdata.sk.wl}}</span>
                     </div>
                     <div class="idx sd">
                         <span>相对湿度</span>
@@ -79,27 +78,60 @@
                 </div>
             </div>
 
-            <div class="trend">
+            <div class="trend-24h-container swiper-container" ref="trend24h">
+                <div class="trend-24h-all swiper-wrapper">
+                    <div v-for="i in fh.a" class="swiper-slide col">
+                        <div class="holder"></div>
+                        <!-- <div class="icon"><i class="wicon" :class="i[5]+i[2]"></i></div> -->
+                        <!-- <div class="wd">{{i[3] | wd}}</div> -->
+                        <!-- <div class="wl">{{i[4] | wl}}</div> -->
+                        <div class="time">{{i[0].substring(2)}}</div>
+                    </div>
+                    <div class="dline" ref="dl24h"></div>
+                    <div class="icons" >
+                        <div v-for="(i, index) in fh.b" :style="{width: i[1]*45 + 'px'}"><i class="wicon" :class="i[0]"></i></div>
+                    </div>
+                    <div class="wls">
+                        <div v-for="(i, index) in fh.c" class="wl" :style="{width: i[1]*45-1 + 'px'}">{{i[0] | wl}}</div>
+                    </div>
+                </div>
+                <div class="swiper-scrollbar"></div>
+            </div>
+
+            <div class="trend-1d-container">
+                <div v-for="i in fdata.fd.d" class="col">
+                    <div class="weekday">{{i[0]}}</div>
+                    <div class="icon"><i class="wicon" :class="'d'+i[3]"></i></div>
+                    <div class="holder"></div>
+                    <div class="icon"><i class="wicon" :class="'n'+i[4]"></i></div>
+                    <div class="wd">{{fdata.fd.dn ? i[5] : i[6]}}</div>
+                    <div class="wl">{{fdata.fd.dn ? i[7] : i[8]}}</div>
+                </div>
+                <div class="dline topTemp" ref="topTemp"></div>
+                <div class="dline lowTemp" ref="lowTemp"></div>
+            </div>
+
+            <!-- <div class="trend">
                 <div class="dr weekday">
-                    <div class="dc" v-for="i in fdata.fc">{{i.fj}}</div>
+                    <div class="dc" v-for="i in fdata.fd.d">{{i[0]}}</div>
                 </div>
                 <div class="dr weatherIcon">
-                    <div class="dc" v-for="i in fdata.fc"><i class="wicon" :class="i.d"></i></div>
+                    <div class="dc" v-for="i in fdata.fd.d"><i class="wicon" :class="'d'+i[3]"></i></div>
                 </div>
                 <div class="dr lineDiv">
                     <div ref="topTemp"></div>
                     <div ref="lowTemp"></div>
                 </div>
                 <div class="dr weatherIcon">
-                    <div class="dc" v-for="i in fdata.fc"><i class="wicon" :class="i.n"></i></div>
+                    <div class="dc" v-for="i in fdata.fd.d"><i class="wicon" :class="'n'+i[4]"></i></div>
                 </div>
                 <div class="dr wind">
-                    <div class="dc" v-for="i in fdata.fc">{{i.w}}</div>
+                    <div class="dc" v-for="i in fdata.fd.d">{{fdata.fd.dn ? i[5] : i[6]}}</div>
                 </div>
                 <div class="dr windLevel">
-                    <div class="dc" v-for="i in fdata.fc">{{i.wl}}</div>
+                    <div class="dc" v-for="i in fdata.fd.d">{{fdata.fd.dn ? i[7] : i[8]}}</div>
                 </div>
-            </div>
+            </div> -->
 
             <ul class="zsList" v-if="fdata.zs">
                 <li class="zs zwx">
