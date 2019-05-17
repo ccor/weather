@@ -1,0 +1,16 @@
+{
+  "name": "code1m",
+  "version": "0.1.0",
+  "description": "code1024",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.16.4",
+    "urllib": "^2.33.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ccor",
+  "license": "ISC"
+}
