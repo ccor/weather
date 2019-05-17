@@ -2,19 +2,47 @@ html{font-size: 16px;}
 body {margin:0;}
 input {outline: 0;}
 .weather {width: 100%; font: 14px "Microsoft Yahei","Tahoma","SimSun"; margin: 0 auto;}
+.container{}
+.container .cities{display: none;}
+.container .forcasts{}
+.icon-delete-s {color: #d81e06; font-size: 30px; cursor: pointer; margin-left: 10px;}
+.icon-caidan{color: #999; margin-right: 10px;}
+.sortable-ghost{ background: #eee; opacity: 0.5;}
+.sortable-drag{background: #fff; opacity: 0.9 !important; border-top: 1px solid #eee;}
+.m-toast-pop {display: none; position: fixed; width: 100%;top: 0;bottom: 0;right: 0;overflow: auto;text-align: center; z-index: 9;}      
+.m-toast-inner {position: absolute;left:50%;top:50%;width: 100%; transform:translate(-50%,-50%);-webkit-transform:translate(-50%,-50%);text-align: center;}
+.m-toast-inner-text{display: inline-block;margin: 0 22px; padding: 19px 21px;font-size: 16px;color: #FFFFFF;letter-spacing: 0;line-height: 22px;background: rgba(0,0,0,0.72);border-radius: 10px;}   
+
+.forcast > .tip {position: absolute; text-align: center; left: 0; right: 0; line-height: 40px; color: #999;}
+.forcast > .swiper-wrapper{background: #fff;}
+/*.cities{min-height: 400px;}*/
+.cities .city{display: flex; line-height: 45px; border-bottom: 1px solid #eee;}
+.cities .city .cityname{min-width: 100px; font-size: 1rem; padding-left: 20px; color: #333;}
+.cities .city .winfo{display: flex; flex: 1;}
+.cities .city .temp{flex: 1; color: #666;}
+.cities .city .temp-range{ padding-right: 15px; color: #999;}
+.cities .city .icon{ padding-right: 20px; display: flex; align-items: center;}
+.city-list {display: flex; flex-flow: column;}
+.city-list .btn{text-decoration:none;}
+.opbar {padding: 5px; border-bottom: 1px solid #eee; display: flex; position: relative; top: 0; left: 0; right: 0; background: #fff;}
+.opbar .title{flex:1;text-align: center; line-height: 32px; font-size: 1.2rem;}
+.opbar .btn{display: block; line-height: 32px; text-align: center; text-decoration: none; color: #666; font-size: 14px; border-radius: 5px; background: #eee; user-select: none;}
+.opbar .btn-add{font-size: 20px; width: 66px;}
+.opbar .btn-mod{font-size: 14px; width: 66px;}
 .swiper-nav {top: 32px; left: 12px !important; bottom: unset !important; text-align: left;}
 .nav ul{list-style: none; display: flex; margin: 0; padding: 0;}
 .nav li{padding: 3px; display: inline-block;}
 .nav li > a {text-decoration: none; line-height: 30px; color: #666;}
 .hide {display: none;}
 .topbar{display: flex; align-items: baseline;}
-.loadingBox {position: relative; top:1px; text-align: center; float: left; left: 122px;}
+.loadingBox {position: absolute; top:12px; left: 0; right: 0; text-align: center;}
 .topbar .city {line-height: 40px; font-size: 16px; flex: 1; display: flex; align-items: baseline; margin-left: 15px;}
 .topbar .city:before{content: ""; height: 15px; width: 10px; background: url('../imgs/icons.png') no-repeat 0 0; position: relative; float: left; margin-right: 5px; top: 2px}
 .cityName {display: inline-block;}
 #citySwtichBtn {display: inline-block; width: 28px; height: 14px; background: url('../imgs/icons.png') no-repeat -32px 0; margin-left: 5px; position:relative; top:3px; }
 #citySwtichBtn:hover {background-position:-60px 0; }
-.citySwtichBox{ position: absolute; width: 270px; background-color: #fff; z-index: 9; border-radius: 3px; top: 42px; box-shadow: 1px 1px 4px 0px #999; left: 50%; margin-left: -135px;}
+.citySwtichBox.hide{top:1000px; display: block;}
+.citySwtichBox{ position: absolute; background-color: #fff; z-index: 9; border-radius: 3px; top: 0; left: 0; right: 0; bottom: 0; transition: top 0.5s;}
 .citySwtichBox .close {float: right; width: 25px; height: 25px; font-size: 18px; color: #b3bac0; cursor: pointer; font-family: serif; position: relative; right: 5px; top: 5px; text-align: center;}
 .citySwtichBox .title{float: left; font-size: 16px; color: #252525; padding: 10px 0 0 10px;}
 .citySwtichBox .hisCities {clear: both; height: 26px; padding: 5px 17px;}
@@ -23,12 +51,14 @@ input {outline: 0;}
 .hisCities .hisCity .del{font-style: normal; color: #3375b9; font-size: 14px;}
 .hisCities .hisCity .del:hover{color: red;}
 
-.citySwtichBox .cityInputBox {width: 243px; height: 50px; text-align: center; margin: 0 auto; display: flex; flex-direction: column; align-items: center;}
-.cityInputBox .itext { width: 230px; height: 32px; line-height: 32px; border: 1px solid #ccd1d7; padding-left: 5px; border-radius: 2px; color: #888d92; font-size: 14px;} 
-.cityInputBox .cityList { margin: 0; padding: 0; list-style: none; position: relative; top:-1px; border:1px solid #ccc;  width: 236px; background-color: #fff;}
-.cityList li {display: block; text-align: left; font-size: 14px; line-height: 25px; text-indent: 6px; cursor: pointer;}
+.citySwtichBox .cityInputBox {display: flex; padding: 8px; position: fixed; left: 0; right: 0; z-index: 10; background: #fff; box-shadow: 0 0 2px 0 #999;}
+.cityInputBox .btn {padding: 8px; color: #666; text-decoration: none; line-height: 19px;}
+.cityInputBox .itext {flex: 1; line-height: 32px; border: 1px solid #ccd1d7; padding-left: 5px; border-radius: 2px; color: #888d92; font-size: 14px;} 
+.citySwtichBox .cityList { margin: 53px 0 0 0; padding: 0; list-style: none; position: relative; background-color: #fff;}
+.cityList li {display: block; text-align: left; font-size: 14px; line-height: 40px; text-indent: 15px; cursor: pointer; border-bottom: 1px solid #eee;}
 .cityList li:hover{background-color: #eee;}
 .cityList li b{color: #ee842f; font-weight: normal;}
+.cityList .added{color: #999;}
 
 .citySwtichBox .btnSave{display: block; background-color: #3375b9; font-size: 14px; height: 30px; line-height: 30px; width: 238px; color: #fff; margin: 0 auto 20px; text-decoration: none; text-align: center; border-radius: 3px;}
 
@@ -57,17 +87,15 @@ input {outline: 0;}
 .idxs .sd {line-height: 17px;}
 .idxs .sd:before {content: ""; height: 15px; width: 8px; position: relative; float: left; margin:0 10px 0 2px; background: url('../imgs/icons.png') no-repeat -10px 0;}
 
-.trend-24h-container{position: relative; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ccc;}
-.trend-24h-all{display: flex; list-style: none; padding: 0; margin: 0;}
+.trend-24h-container{position: relative; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #ccc;}
+.trend-24h-all {display: flex; list-style: none; padding: 0; margin: 0;}
 .trend-24h-all .col{display: flex; flex-direction: column; width: 45px; text-align: center;}
-.trend-24h-all .holder {height: 136px;}
-.trend-24h-all .time {line-height: 30px; color: #999;}
-.trend-24h-all .icon {}
-.trend-24h-all .wd {margin-top: 6px;}
-.trend-24h-all .wl {margin-top: 6px;}
+.col .holder {height: 136px; width: 45px;}
+.col .time {line-height: 30px; width: 45px; color: #999;}
+.col .icon {}
 .trend-24h-container .dline {position: absolute; height: 100px; top: 10px;}
 .trend-24h-container .icons {position: absolute; height: 30px; top: 80px; display: flex;}
-.trend-24h-container .wls {position: absolute; top: 110px; display: flex; text-align: center; font-size: 12px; line-height: 20px;}
+.trend-24h-container .wls {position: absolute; top: 116px; display: flex; text-align: center; font-size: 12px; line-height: 20px;}
 .trend-24h-container .wls .wl{background: #eee; border-radius:5px 5px 0 0; border-right: 1px solid #fff; color: #666;}
 
 .trend-1d-container{position: relative; display: flex; justify-content: space-around;}

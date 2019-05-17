@@ -1,18 +1,31 @@
 CACHE MANIFEST
-# 2019-05-05
+# 2019-05-14
 index.html
 css/swiper.min.css
 css/main.css
+css/iconfont.css
+css/iconfont.eot
+css/iconfont.svg
+css/iconfont.ttf
+css/iconfont.woff
+css/iconfont.woff2
 imgs/blue30.png
 imgs/icons.png
 imgs/loading.gif
+
+js/lib/zepto.min.js
 js/lib/raphael.min.js
 js/lib/swiper.min.js
 js/lib/vue.min.js
-js/lib/zepto.min.js
-js/city.js
+js/lib/Sortable.min.js
+js/lib/vuedraggable.umd.min.js
 js/line.js
+js/vue_swiper.js
+js/vue_forcast.js
+js/vue_city_mgr.js
+js/city.js
 js/main.js
+
 
 NETWORK:
 *

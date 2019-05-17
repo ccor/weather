@@ -3,15 +3,20 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>weather</title>
-
+    <title>顺溜天气</title>
     <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/iconfont.css">
 
     <script type="text/javascript" src="js/lib/zepto.min.js"></script>
     <script type="text/javascript" src="js/lib/vue.min.js"></script>
     <script type="text/javascript" src="js/lib/raphael.min.js"></script>
     <script type="text/javascript" src="js/lib/swiper.min.js"></script>
+    <script type="text/javascript" src="js/lib/Sortable.min.js"></script>
+    <script type="text/javascript" src="js/lib/vuedraggable.umd.min.js"></script>
+    <script type="text/javascript" src="js/vue_forcast.js"></script>
+    <script type="text/javascript" src="js/vue_city_mgr.js"></script>
+    <script type="text/javascript" src="js/vue_swiper.js"></script>
     <script type="text/javascript" src="js/line.js"></script>
     <script type="text/javascript" src="js/city.js"></script>
     
@@ -19,144 +24,19 @@
   </head>
   <body>
     <div class="weather" id="app">
-        <div class="citySwtichBox hide">
-            <div class="title">切换城市</div>
-            <div class="close">×</div>
-            <div class="hisCities">
-                <div class="hisCity" v-for="c in cities" @click="swtichHisCity(c.i, c.c)">{{c.c}} <i class="del" @click.stop="delCity(c.i)">×</i></div>
-            </div>
-            <div class="cityInputBox">
-                <input type="text" class="itext" placeholder="请输入城市名称" name="cityName"/>
-                <ul class="cityList hide"></ul>
-            </div>
-            <a class="btnSave" href="javascript:;" @click="swtichCity">保存</a>
-        </div>
-        <div class="swiper-container forcast-box" ref="forcastBox">
-            <div class="swiper-pagination swiper-nav"></div>
-            <div class="swiper-wrapper">
-                <forcast v-for="c in cities" :key="c.i" :city-id="c.i" class="swiper-slide"></forcast>
-            </div>
-        </div>
-        <div class="btns">
-            <a href="javascript:void(0);" class="btn-add" @click="showCitySwtich"> + </a>
-        </div>
+        <toast ref="toast"></toast>
+        <city-selector v-model="citySelectorShow" :cities="cities" @choose="addCity"></city-selector>
+        <swiper :options="mainSwiperOpts" ref="mainSwiper" @swipe-right="onSwipeRight">
+            <city-mgr class="swiper-slide" :cities="cities" @add="showCitySelector" @del="delCity" @sort="sortCity"></city-mgr>
+            <swiper class="swiper-slide" :options="forcastSwiperOpts" ref="forcastSwiper">
+                <forcast v-for="c in cities" :key="c.i" :city-id="c.i" class="swiper-slide" @update="update"></forcast>
+                <template #footer>
+                    <div class="swiper-pagination swiper-nav"></div>
+                </template>
+            </swiper>
+        </swiper>
     </div>
 
-    <script type="text/x-template" id="forcast-template">
-        
-        <div class="forcast">
-            <div class="loadingBox" v-show="loading"><img src="imgs/loading.gif" height="20" width="20"></div>
-          <div class="topbar">
-                <div class="city">
-                    <span class="cityName">{{fdata.cn}}</span>
-                </div>
-                <div class="updateTime" v-if="fdata.t">{{fdata.t}} 更新</div>
-            </div>
-            <div class="alarms swiper-container" ref="alarms">
-                <div class="swiper-wrapper">
-                    <a v-for="a in fdata.w" :class="'alarm'+a[1]" class="swiper-slide" href="javascript:void(0);">{{a[3]}}</a>
-                </div>
-            </div>
-            <div class="idxs" v-if="fdata.sk">
-                <div class="idx temp left">
-                    <span class="tempVal">{{fdata.sk.t}}</span>
-                    <span class="tempUnit">℃</span>
-                </div>
-                <div class="right">
-                    <div class="idx aqi" v-if="fdata.sk.aqi" :style="{backgroundColor: fdata.sk.aqisbg}">
-                        <span class="aqiVal">{{fdata.sk.aqi}}</span>
-                        <span class="aqis">{{fdata.sk.aqis}}</span>
-                    </div>
-                    <div class="idx wind">
-                        <span class="windD">{{fdata.sk.wd}}</span>
-                        <span class="windS">{{fdata.sk.wl}}</span>
-                    </div>
-                    <div class="idx sd">
-                        <span>相对湿度</span>
-                        <span class="sdVal">{{fdata.sk.sd}}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="trend-24h-container swiper-container" ref="trend24h">
-                <div class="trend-24h-all swiper-wrapper">
-                    <div v-for="i in fh.a" class="swiper-slide col">
-                        <div class="holder"></div>
-                        <!-- <div class="icon"><i class="wicon" :class="i[5]+i[2]"></i></div> -->
-                        <!-- <div class="wd">{{i[3] | wd}}</div> -->
-                        <!-- <div class="wl">{{i[4] | wl}}</div> -->
-                        <div class="time">{{i[0].substring(2)}}</div>
-                    </div>
-                    <div class="dline" ref="dl24h"></div>
-                    <div class="icons" >
-                        <div v-for="(i, index) in fh.b" :style="{width: i[1]*45 + 'px'}"><i class="wicon" :class="i[0]"></i></div>
-                    </div>
-                    <div class="wls">
-                        <div v-for="(i, index) in fh.c" class="wl" :style="{width: i[1]*45-1 + 'px'}">{{i[0] | wl}}</div>
-                    </div>
-                </div>
-                <div class="swiper-scrollbar"></div>
-            </div>
-
-            <div class="trend-1d-container">
-                <div v-for="i in fdata.fd.d" class="col">
-                    <div class="weekday">{{i[0]}}</div>
-                    <div class="icon"><i class="wicon" :class="'d'+i[3]"></i></div>
-                    <div class="holder"></div>
-                    <div class="icon"><i class="wicon" :class="'n'+i[4]"></i></div>
-                    <div class="wd">{{fdata.fd.dn ? i[5] : i[6]}}</div>
-                    <div class="wl">{{fdata.fd.dn ? i[7] : i[8]}}</div>
-                </div>
-                <div class="dline topTemp" ref="topTemp"></div>
-                <div class="dline lowTemp" ref="lowTemp"></div>
-            </div>
-
-            <!-- <div class="trend">
-                <div class="dr weekday">
-                    <div class="dc" v-for="i in fdata.fd.d">{{i[0]}}</div>
-                </div>
-                <div class="dr weatherIcon">
-                    <div class="dc" v-for="i in fdata.fd.d"><i class="wicon" :class="'d'+i[3]"></i></div>
-                </div>
-                <div class="dr lineDiv">
-                    <div ref="topTemp"></div>
-                    <div ref="lowTemp"></div>
-                </div>
-                <div class="dr weatherIcon">
-                    <div class="dc" v-for="i in fdata.fd.d"><i class="wicon" :class="'n'+i[4]"></i></div>
-                </div>
-                <div class="dr wind">
-                    <div class="dc" v-for="i in fdata.fd.d">{{fdata.fd.dn ? i[5] : i[6]}}</div>
-                </div>
-                <div class="dr windLevel">
-                    <div class="dc" v-for="i in fdata.fd.d">{{fdata.fd.dn ? i[7] : i[8]}}</div>
-                </div>
-            </div> -->
-
-            <ul class="zsList" v-if="fdata.zs">
-                <li class="zs zwx">
-                    <div class="zsIcon"></div>
-                    <div class="zsTitle">紫外线指数</div>
-                    <div class="zsText">{{fdata.zs.zwx}}</div>
-                </li>
-                <li class="zs cy">
-                    <div class="zsIcon"></div>
-                    <div class="zsTitle">穿衣指数</div>
-                    <div class="zsText">{{fdata.zs.cy}}</div>
-                </li>
-                <li class="zs xc">
-                    <div class="zsIcon"></div>
-                    <div class="zsTitle">洗车指数</div>
-                    <div class="zsText">{{fdata.zs.xc}}</div>
-                </li>
-                <li class="zs gm">
-                    <div class="zsIcon"></div>
-                    <div class="zsTitle">感冒指数</div>
-                    <div class="zsText">{{fdata.zs.gm}}</div>
-                </li>
-            </ul>
-        </div>
-    </script>
     <script type="text/javascript" src="js/main.js"></script>
   </body>
 </html>

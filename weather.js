@@ -138,5 +138,3 @@ exports.get = (req, res) => {
     });
     
 }
-
-exports.getWeather = getWeather;
